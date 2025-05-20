@@ -13,19 +13,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
-
-      - name: Build and push Docker image
+      - name: Build Docker image
         run: |
           docker build -t myappimage:${{ github.sha }} .
-          docker tag myappimage:${{ github.sha }} ${{ github.sha }}
-      
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'genai-teams-qa'         # <-- EDIT this!
+          app-name: '<your-app-name>'         # <-- EDIT this!
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
           images: 'myappimage:${{ github.sha }}'

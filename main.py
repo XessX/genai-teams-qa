@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-# Load environment variables
+# Load environment variables from .env if present
 load_dotenv()
 
 # HuggingFace/GenAI Imports
@@ -23,7 +23,6 @@ from botbuilder.core import (
 from botbuilder.schema import Activity
 
 import aiohttp
-import asyncio
 
 # --- HuggingFace Model IDs
 MIXTRAL_MODEL_ID = "mistralai/Mixtral-8x7B-Instruct-v0.1"
@@ -109,10 +108,9 @@ async def ask(request: QuestionRequest):
         )
 
 # --- Teams Bot Integration
-# Read bot credentials from env vars (set in Azure)
 APP_ID = os.getenv("MicrosoftAppId", "")
 APP_PASSWORD = os.getenv("MicrosoftAppPassword", "")
-GENAI_API_URL = os.getenv("GENAI_API_URL", "")  # (Optional: point to /ask endpoint)
+GENAI_API_URL = os.getenv("GENAI_API_URL", "")
 
 adapter_settings = BotFrameworkAdapterSettings(APP_ID, APP_PASSWORD)
 adapter = BotFrameworkAdapter(adapter_settings)
@@ -125,12 +123,10 @@ class GenAIBot(ActivityHandler):
         if not user_message:
             await turn_context.send_activity("[No input received. Please enter your question.]")
             return
-        # Call the GenAI backend (FastAPI) for a real AI answer
         ai_answer = await self.call_genai_api(user_message)
         await turn_context.send_activity(ai_answer)
 
     async def call_genai_api(self, user_message: str) -> str:
-        """Calls the FastAPI /ask endpoint and returns the answer."""
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(
@@ -160,7 +156,11 @@ async def teams_messages(request: Request):
         return Response(content=response.body, status_code=response.status, media_type="application/json")
     return Response(status_code=201)
 
-# Health check
 @app.get("/")
 def root():
     return {"status": "App is running and ready for requests."}
+
+# This block is for LOCAL development only; Azure ignores it.
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)

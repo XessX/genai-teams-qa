@@ -1,9 +1,10 @@
 fastapi
-uvicorn
-pydantic
+uvicorn[standard]
 python-dotenv
-openai>=1.0.0
+openai
 huggingface_hub
-aiohttp
 botbuilder-core
 botbuilder-schema
+aiohttp
+requests
+pydantic

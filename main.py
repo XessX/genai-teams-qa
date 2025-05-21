@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-# Load environment variables from .env if present
+# Load environment variables
 load_dotenv()
 
 # HuggingFace/GenAI Imports
@@ -112,6 +112,9 @@ APP_ID = os.getenv("MicrosoftAppId", "")
 APP_PASSWORD = os.getenv("MicrosoftAppPassword", "")
 GENAI_API_URL = os.getenv("GENAI_API_URL", "")
 
+# Set the default LLM provider for Teams (from env, or fallback)
+DEFAULT_LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai").lower()
+
 adapter_settings = BotFrameworkAdapterSettings(APP_ID, APP_PASSWORD)
 adapter = BotFrameworkAdapter(adapter_settings)
 memory = MemoryStorage()
@@ -131,7 +134,10 @@ class GenAIBot(ActivityHandler):
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     GENAI_API_URL or "http://localhost:8000/ask",
-                    json={"question": user_message, "provider": "mixtral"},
+                    json={
+                        "question": user_message,
+                        "provider": DEFAULT_LLM_PROVIDER  # <--- use env/configurable provider
+                    },
                     timeout=20,
                 ) as resp:
                     if resp.status == 200:
@@ -160,7 +166,7 @@ async def teams_messages(request: Request):
 def root():
     return {"status": "App is running and ready for requests."}
 
-# This block is for LOCAL development only; Azure ignores it.
+# Local dev only (not used in Azure)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000)

@@ -59,7 +59,7 @@ Test Teams bot using Azure Bot Framework Emulator or deploy to Azure.
 🛠️ Azure Deployment
 Deploy using local Git, or via GitHub Actions.
 
-Set these Application Settings in Azure Portal:
+Set these Environment Variables in Azure Portal:
 
 OPENAI_API_KEY
 
@@ -94,7 +94,7 @@ Add screenshots or gifs here to showcase your bot in action!
 
 🛡️ License
 MIT License
-(c) 2024 Al Jubair Hossain
+(c) 2025 Al Jubair Hossain / XessX
 
 🤝 Contributions
 PRs, issues, and suggestions are welcome!
